@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.AddMeSettingMapper">
+    <select id="selectAddMeSetting" parameterType="java.lang.Integer" resultType="cn.appservice.po.AddMeSetting">
+        select * from addMeSetting where userId = #{userId}
+    </select>
+
+    <update id="updateAddMeSetting" parameterType="cn.appservice.po.AddMeSetting">
+        update addMeSetting
+        <set>
+            <if test="open_phone != null">
+                open_phone = #{open_phone}
+            </if>
+
+            <if test="open_code != #{open_code}">
+                open_code = #{open_code}
+            </if>
+        </set>
+        where userId = #{userId}
+    </update>
+
+    <insert id="insertAddMeSetting" parameterType="cn.appservice.po.AddMeSetting">
+        insert into addMeSetting(userId,open_phone,open_code)
+        values (#{userId},#{open_phone},#{open_code})
+    </insert>
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.FriendCoustomMapper" >
+
+    <resultMap id="selectUserFriendsMap" type="cn.appservice.po.FriendCoustom">
+        <id property="userId" column="userId"/>
+        <result property="icon" column="icon"/>
+        <result property="username" column="username"/>
+        <result property="roomId" column="roomId"/>
+        <result property="remarkname" column="remarkname"/>
+    </resultMap>
+
+    <select id="selectUserFriendsByUserId" resultMap="selectUserFriendsMap">
+        SELECT user.username,
+		user.id userId,
+		user.icon,
+		friend.roomId,
+		CASE WHEN r.username is null then '' else r.username END remarkname,
+		CASE WHEN r.state is null then 0 else r.state END remarkstate
+        FROM friend
+        LEFT JOIN userRemarks r ON friend.hostId = r.userId
+        LEFT JOIN user ON user.id = friend.hostId
+        WHERE
+        friend.friendId = #{id}
+        AND r.formUserId = friend.friendId
+        AND friend.state = #{state}
+        UNION ALL
+        SELECT user.username,
+		user.id userId,
+		user.icon,
+		friend.roomId,
+		CASE WHEN r.username is null then '' else r.username END remarkname,
+		CASE WHEN r.state is null then 0 else r.state END remarkstate
+        FROM friend
+        LEFT JOIN userRemarks r ON  friend.friendId = r.userId
+        LEFT JOIN user ON user.id = friend.friendId
+        WHERE
+        friend.hostId = #{id}
+        AND r.formUserId = friend.hostId
+        AND friend.state = #{state}
+    </select>
+
+    <select id="selectFriendsByUserIdAndFriendsId" resultType="java.lang.Integer">
+        SELECT
+		hostId AS userId
+        FROM friend
+        WHERE
+        hostId = #{friendId}
+        AND friendId = #{userId}
+        AND friend.state = #{state}
+        UNION ALL
+        SELECT friendId AS userId
+        FROM friend
+        WHERE
+        hostId = #{userId}
+        AND friendId = #{friendId}
+        AND friend.state = #{state}
+    </select>
+
+    <select id="selectUserFriendsByFriendId" resultMap="selectUserFriendsMap" >
+		SELECT
+		user.username,
+		user.id userId,
+		user.icon,
+		friend.roomId,
+		CASE WHEN r.username is null then '' else r.username END remarkname,
+		CASE WHEN r.state is null then 0 else r.state END remarkstate
+		FROM user 
+		INNER JOIN friend ON user.id = friend.friendId
+		LEFT JOIN userRemarks r ON user.id = r.userId
+		WHERE (friend.hostId = #{id} OR friend.friendId = #{id} )
+		AND friend.state = #{state}
+		AND user.id !=#{id}
+		AND r.formUserId=#{id}
+		ORDER BY userId
+    </select>
+
+    <select id="selectUserFriendsByHostId" resultMap="selectUserFriendsMap" parameterType="java.lang.Integer" >
+        SELECT  
+		user.username,
+		user.id userId,
+		user.icon,
+		friend.roomId,
+		CASE WHEN r.username is null then '' else r.username END remarkname,
+		CASE WHEN r.state is null then 0 else r.state END remarkstate
+		FROM user 
+		INNER JOIN friend ON user.id = friend.hostId
+		LEFT JOIN userRemarks r ON user.id = r.userId
+		WHERE
+		(friend.hostId = #{id}
+		OR friend.friendId = #{id} )
+		AND friend.state = #{state}
+		AND user.id !=#{id}
+		AND r.formUserId=#{id}
+		ORDER BY userId
+    </select>
+
+    <select id="selectRequestAddFriend" resultMap="selectUserFriendsMap" parameterType="java.lang.Integer">
+      SELECT user.username,
+      user.id userId,
+      user.icon,
+      friend.roomId
+      FROM friend ,user
+      WHERE friend.friendId = #{id}
+      AND friend.state = 1
+      AND friend.hostId =  user.id;
+    </select>
+
+    <delete id="delectFriend">
+      DELETE FROM
+      friend  WHERE friend.hostId = #{hostId}
+      AND friend.friendId = #{friendId}
+    </delete>
+    
+    
+    <insert id="insertUserRemarks" >
+        INSERT INTO userRemarks
+        (userId,username,formUserId,state)
+        VALUES
+        (#{userId},#{username},#{formUserId},#{state})
+    </insert>
+
+    <select id="selectUserRemark" resultType="cn.appservice.po.UserRemarksCustom">
+        SELECT * FROM userRemarks
+        where userId = #{userId}
+        AND formUserId = #{formUserId}
+    </select>
+
+    <update id="updateUserRemarks">
+        UPDATE userRemarks
+        SET username = #{username},
+        state = 1
+        where userId = #{userId}
+        AND formUserId = #{formUserId}
+    </update>
+
+</mapper>

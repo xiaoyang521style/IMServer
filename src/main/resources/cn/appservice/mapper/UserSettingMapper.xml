@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.UserSettingMapper">
+    <select id="selectUserSetting" resultType="cn.appservice.po.UserSetting" parameterType= "java.lang.Integer">
+            SELECT * FROM userSetting WHERE userId = #{userId}
+    </select>
+
+    <insert id="insertUserSetting" parameterType="cn.appservice.po.UserSetting">
+        INSERT INTO userSetting (userId,message_notif,show_msgDetail) values (#{userId},#{message_notif},#{show_msgDetail})
+    </insert>
+
+    <update id="updateUserSetting" parameterType="cn.appservice.po.UserSetting">
+        UPDATE  userSetting
+        <set>
+            <if test="message_notif != null" >
+                message_notif = #{message_notif},
+            </if>
+            <if test="idcardFImgUri != null" >
+                show_msgDetail = #{show_msgDetail},
+            </if>
+        </set>
+        WHERE userId=#{userId}
+    </update>
+</mapper>

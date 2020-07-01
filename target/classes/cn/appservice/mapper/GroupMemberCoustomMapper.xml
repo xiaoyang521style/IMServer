@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.GroupMemberCoustomMapper" >
+
+    <resultMap id="selectMessageMap" type="cn.appservice.po.MessageCoustom">
+        <result property="userId" column="userId" />
+        <result property="friendId" column="friendId" />
+        <result property="content" column="content" />
+        <result property="chatType" column="chatType" />
+        <result property="state" column="state" />
+        <result property="sendtime" column="sendtime" />
+    </resultMap>
+
+    <resultMap id="selectUserInfoMap" type="cn.appservice.po.MemberUserInfo" >
+        <result property="roomId" column="group_id" />
+        <result property="groupName" column="group_name" />
+        <collection property="users" javaType="java.util.List" ofType="cn.appservice.po.MemberUser">
+            <result column="id" property="userId" />
+            <result column="sex" property="sex" />
+            <result column="birthday" property="birthday" />
+            <result column="username" property="username" />
+            <result column="icon" property="icon" />
+            <result column="location" property="location" />
+        </collection>
+    </resultMap>
+    <select id="selectGroupMemberUserIdsByGroupId" resultType="java.lang.Integer" parameterType="java.lang.Integer" >
+        SELECT
+        group_member_id
+        FROM group_member
+        WHERE group_id = #{id}
+        GROUP BY group_member_id
+    </select>
+
+    <select id="selectUserInfo" resultMap="selectUserInfoMap" parameterType="java.lang.Integer">
+      SELECT
+      group_dynamic_property.group_id,
+      group_dynamic_property.group_name,
+      user.id,
+      user.username,
+      user.icon,
+      user.sex,
+      user.birthday,
+      user.location
+      FROM
+      group_dynamic_property,
+      group_member,
+      group_property,
+      user
+      WHERE group_dynamic_property.group_id = group_member.group_id
+      AND group_property.id = group_dynamic_property.group_id
+      AND group_member.`group_member_id` = user.id
+      AND group_property.id = #{id}
+    </select>
+
+    <delete id="delectGroupMemberUser">
+        delete from group_member where group_id = #{groupId} and group_member_id=#{group_member_id}
+    </delete>
+
+
+</mapper>

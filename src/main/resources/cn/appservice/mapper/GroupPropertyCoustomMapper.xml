@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.GroupPropertyCoustomMapper" >
+    <insert id="insertReturnId" parameterType="GroupProperty" useGeneratedKeys="true" keyProperty="id">
+        insert into
+         group_property
+        (group_creater_id, group_create_datetime,group_statu)
+        values
+        (#{groupCreaterId}, #{groupCreateDatetime}, #{groupStatu})
+    </insert>
+
+
+    <resultMap id="selectGroupInfoMap" type="cn.appservice.po.GroupInfoCoustom">
+        <result property="roomId" column="roomId"/>
+        <result property="groupName" column="groupName"/>
+        <result property="masterId" column="masterId"/>
+       <collection property="users" ofType="cn.appservice.po.GroupInfoUser">
+           <result property="username" column="username"/>
+           <result property="userId" column="userId"/>
+           <result property="icon" column="icon"/>
+       </collection>
+    </resultMap>
+    <select id="selectGroupInfo" parameterType="java.lang.Integer" resultMap="selectGroupInfoMap">
+        SELECT
+        group_dynamic_property.group_name groupName,
+        group_dynamic_property.group_owner_uid masterId,
+        group_dynamic_property.group_id roomId,
+        user.username,
+        user.icon,
+        user.id userId
+        FROM  group_dynamic_property,
+        group_member,
+        user
+        WHERE group_member.group_member_id = user.id
+        AND group_dynamic_property.group_id = group_member.group_id
+        AND group_dynamic_property.group_id = #{id}
+        GROUP BY  user.id
+        ORDER BY group_member.group_member_identity ,group_member.group_member_join_datetime
+
+    </select>
+
+    <update id="updateGroupName" parameterType="cn.appservice.base.po.GroupDynamicProperty">
+        UPDATE group_dynamic_property
+        SET group_name = #{groupName}
+        where group_id = #{groupId}
+    </update>
+    
+    <!--入群-->
+    <insert id="insertGroupMember" >
+        INSERT INTO group_member
+        (group_id,group_member_id,group_member_identity,group_member_join_datetime,group_join_type)
+        VALUES
+        (#{groupId},#{groupMemberId},#{groupMemberIdentity},#{groupMemberJoinDatetime},#{groupJoinType})
+    </insert>
+
+    <update id="updateGroupMember">
+        UPDATE group_member SET
+        <if test="group_member_identity!=null">
+            group_member_identity=#{group_member_identity}
+        </if>
+        WHERE group_member_id =#{group_member_id}
+        AND group_id = #{group_id}
+    </update>
+
+
+    <!--退群-->
+    <delete id="delectGroupMember">
+        DELETE  FROM group_member
+        WHERE group_id = #{groupId}
+        AND group_member_id = #{groupMemberId}
+    </delete>
+
+
+    <!-- 设置群变化表 -->
+    <update id="updateGroupChangeTable">
+        UPDATE group_dynamic_property SET group_change_datetime = #{time}
+        WHERE group_id = #{groupId}
+    </update>
+
+    <!--群名时间变化-->
+    <insert id="insertGroupNameChange" parameterType="cn.appservice.po.GroupNameChange">
+        INSERT group_name_change(userId,changetime,groupId)
+        VALUES (#{userId},#{changetime},#{groupId})
+    </insert>
+
+    <!--更新群主-->
+
+    <update id="updateGroupGroupOwnerUid" >
+        UPDATE group_dynamic_property
+        SET group_owner_uid= #{group_owner_uid}
+        where group_id = #{groupId}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.MessageCoustomMapper" >
+    
+    <resultMap id="selectMessageMap" type="cn.appservice.po.MessagesVo">
+        <result property="roomId" column="rid" />
+        <collection property="messages" ofType="cn.appservice.po.MessageCoustom">
+            <id property="messageId" column="id"/>
+            <result property="userId" column="userId" />
+            <result property="friendId" column="friendId" />
+            <result property="content" column="content" />
+            <result property="chatType" column="chatType" />
+            <result property="state" column="state" />
+            <result property="roomId" column="roomId" />
+            <result property="sendtime" column="sendtime" />
+            <result property="messageId" column="messageId" />
+        </collection>
+    </resultMap>
+
+    <update id="updateMessageStateForRead">
+      UPDATE message_state set state = 50
+      WHERE  user_id  = #{id}
+      AND roomId = #{roomId}
+    </update>
+    
+    <select id="readOfflineMessage" resultMap="selectMessageMap" parameterType="java.lang.Integer">
+
+    SELECT
+    message.id,
+    message.userId,
+    message.friendId,
+    message.content,
+    CASE WHEN message.messageId is null then '' else message.messageId END messageId,
+    message.chatType,
+    message.roomId,
+    message.roomId rid,
+    unix_timestamp(message.sendtime)*1000 sendtime,
+    message_state.state
+    FROM
+    message_state
+    left  outer JOIN message ON message_state.message_id =  message.id
+    WHERE message_state.state  = 0
+    AND message_state.user_id = #{id}
+   </select>
+
+
+    <delete id="delectMessageByRoomId" parameterType="java.lang.String">
+        DELETE FROM message WHERE roomId = #{roomId}
+    </delete>
+    
+    <!--未读消息统计-->
+    <select id="selectUnreadcountByUserId" parameterType="java.lang.Integer" resultType="int">
+        SELECT COUNT(*) FROM message_state
+        WHERE user_id = #{user_id}
+        AND state = 0
+    </select>
+    
+</mapper>

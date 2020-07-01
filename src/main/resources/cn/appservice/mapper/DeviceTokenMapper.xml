@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+    <mapper namespace="cn.appservice.mapper.DeviceTokenMapper" >
+
+    <resultMap id="SelectDeviceInfoMap" type="cn.appservice.po.DeviceTokenQuery" >
+        <id property="deviceId" column="deviceId"/>
+        <result property="deviceModel" column="deviceModel"/>
+        <result property="deviceToken" column="deviceToken"/>
+    </resultMap>
+
+    <select id="selectDeviceInfoByUserId" resultMap="SelectDeviceInfoMap" parameterType="java.lang.Integer" >
+        select
+        deviceInfo.id deviceId,
+        deviceInfo.deviceModel,
+        deviceInfo.deviceToken
+        from deviceInfo ,userDevice
+        where userDevice.deviceId = deviceInfo.id
+        and userDevice.userId = #{userId}
+    </select>
+</mapper>

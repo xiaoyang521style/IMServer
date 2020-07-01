@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.appservice.mapper.GroupMessageCoustomMapper" >
+
+    <resultMap id="selectGroupMessageMap" type="cn.appservice.po.GroupMessageVo">
+        <result property="roomId" column="roomId" javaType="java.lang.String" />
+        <collection property="messages" ofType="cn.appservice.po.GroupMessageCoustom">
+            <result property="roomId" column="roomId" javaType="java.lang.String"/>
+            <result property="content" column="content" />
+            <result property="sendtime" column="sendtime" />
+            <result property="state" column="state" />
+            <result property="userId" column="userId" />
+            <result property="chatType" column="chatType"/>
+            <result property="messageId" column="messageId"/>
+        </collection>
+    </resultMap>
+
+    <insert id="insertReturnId" parameterType="cn.appservice.base.po.GroupMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into group_message(group_id, content, chatType, sendtime, sendId,messageId)
+        values(#{groupId}, #{content}, #{chattype}, #{sendtime}, #{sendid},#{messageid})
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+    
+    <select id="readOfflineGroupMessage" resultMap="selectGroupMessageMap" parameterType="java.lang.Integer">
+      SELECT group_message.group_id roomId,
+        group_message.content,
+        group_message.chatType,
+        unix_timestamp(group_message.sendtime)*1000 sendtime,
+        group_message_state.state,
+        group_message.sendId userId,
+        CASE WHEN group_message.messageId is null then '' else group_message.messageId END messageId
+        FROM group_message,
+        group_message_state,
+        group_member
+        WHERE
+        group_message_state.group_message_id  = group_message.id
+        AND group_member.group_member_id =  group_message_state.user_id
+        AND group_member.group_id =  group_message.group_id
+        AND group_message_state.user_id = #{id}
+        AND group_message_state.state = 0
+        GROUP BY group_message_state.group_message_id
+    </select>
+
+    <update id="updateGroupMessage" parameterType="java.lang.Integer">
+      UPDATE group_message_state set state = 50
+      WHERE  user_id = #{id}
+    </update>
+
+    
+    <select id="selectMessageIdBySendId" resultType="cn.appservice.base.po.GroupMessage">
+        SELECT  * FROM group_message
+        WHERE sendId = #{sendId}
+        AND group_id = #{groupId}
+    </select>
+    
+    <delete id = "delectGroupMessageStateByMeessageId" >
+        DELETE FROM group_message_state
+        WHERE group_message_id = #{meessageId}
+    </delete>
+    
+    <!--未读消息统计-->
+    <select id="selectUnreadcountByUserId" parameterType="java.lang.Integer" resultType="int" >
+        SELECT COUNT(*) FROM  group_message_state
+        WHERE user_id= #{user_id}
+        AND state = 0
+        GROUP BY group_message_id
+    </select>
+
+</mapper>

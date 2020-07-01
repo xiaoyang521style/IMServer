@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!-- 属性定义
+    加载一个properties文件
+    在 properties标签中配置属性值
+     -->
+    <properties resource="db.properties">
+        <!-- <property name=""value=""/> -->
+    </properties>
+
+    <!-- 定义别名 -->
+    <typeAliases>
+        <!--
+        单个别名的定义
+        alias：别名，type：别名映射的类型 -->
+        <!-- <typeAliastype="cn.itcast.mybatis.po.User" alias="user"/> -->
+        <!--批量别名定义
+        指定包路径，自动扫描包下边的pojo，定义别名，别名默认为类名（首字母小写或大写）
+         -->
+        <package name="cn.appservice.base.po"/>
+        <package name="cn.appservice.po"/>
+    </typeAliases>
+
+    <!-- 和spring整合后 environments配置将废除-->
+    <environments default="development">
+        <environment id="development">
+            <!--使用jdbc事务管理-->
+            <transactionManager type="JDBC"/>
+            <!--数据库连接池-->
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value ="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="poolPingEnabled" value="true"/>
+                <property name="poolPingQuery" value="select 1"/>
+                <property name="poolPingConnectionsNotUsedFor" value="3600000"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--加载mapper映射
+    如果将和spring整合后，可以使用整合包中提供的mapper扫描器，此处的mappers不用配置了。
+     -->
+    <mappers>
+        <!--通过resource引用mapper的映射文件 -->
+
+        <mapper resource="cn/appservice/base/mapper/MessageMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/UserMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/DeviceinfoMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/UserdeviceMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/FriendMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/SocketinfoMapper.xml" />
+
+        <mapper resource="cn/appservice/mapper/FriendCoustomMapper.xml" />
+        <mapper resource="cn/appservice/mapper/DeviceTokenMapper.xml" />
+        <mapper resource="cn/appservice/mapper/MessageCoustomMapper.xml" />
+
+        <mapper resource="cn/appservice/base/mapper/GroupDynamicPropertyMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/GroupMessageMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/GroupMessageStateMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/GroupPropertyChangeMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/GroupPropertyMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/GroupMemberMapper.xml" />
+        <mapper resource="cn/appservice/base/mapper/MessageStateMapper.xml" />
+
+        <mapper resource="cn/appservice/mapper/GroupMemberCoustomMapper.xml" />
+        <mapper resource="cn/appservice/mapper/GroupMessageCoustomMapper.xml" />
+        <mapper resource="cn/appservice/mapper/GroupPropertyCoustomMapper.xml" />
+        <mapper resource="cn/appservice/mapper/MessageCoustomMapper.xml" />
+        <mapper resource="cn/appservice/mapper/UserSettingMapper.xml"/>
+        <mapper resource="cn/appservice/mapper/AddMeSettingMapper.xml" />
+
+    </mappers>
+</configuration>
